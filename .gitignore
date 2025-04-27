@@ -1,1 +1,4 @@
+*.o
+*.pdf
+pdf
 string_builder

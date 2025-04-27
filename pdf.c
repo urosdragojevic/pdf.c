@@ -1,25 +1,11 @@
 #include<stdio.h>
+#include "./string_builder.h"
 
-int length_of_string(char* str) {
-  int length = 0;
-  while (str[length] != '\0') {
-    length++;
-  }
-  return length;
-}
-
-
-size_t write_line_to_file(char* line, FILE* file) {
-  size_t written = fwrite(line, sizeof(char), length_of_string(line), file);
+size_t write_sb_to_file(StringBuilder *sb, FILE* file) {
+  size_t written = fwrite(sb->items, sizeof(char), sb->count, file);
   printf("Written %zu bytes to file.\n", written);
   return written;
 }
-
-/*
- * TODO: re-use memory for strings
- *
- * */
-
 
 // Generates an absolutely minimal ./test.pdf file
 int main() {
@@ -33,49 +19,44 @@ int main() {
 
   printf("Opened file\n");
 
-  size_t start_xref_count = 0; 
+  StringBuilder sb = {0};
 
-  char* version = "%PDF-1.7\n";
+  sb_init(&sb, 256);
 
-  // sizeof(version) is size of the pointer.
+  sb_append_cstr(&sb, "%PDF-1.7\n");
+  sb_append_cstr(&sb, "1 0 obj\n    << /Type /Catalog\n       /Version 1.7\n    >>\nendobj\n");
 
-  start_xref_count += write_line_to_file(version, file);
+  sb_append_cstr(&sb,"\n");
 
-  char* catalog = "1 0 obj\n    << /Type /Catalog\n       /Version 1.7\n    >>\nendobj\n";
-  start_xref_count += write_line_to_file(catalog, file);
+  size_t start_xref_count = sb.count; 
 
-  start_xref_count += write_line_to_file("\n", file);
+  sb_append_cstr(&sb,"xref\n");
+  sb_append_cstr(&sb,"0 2\n");
+  sb_append_cstr(&sb,"0000000000 65535 f\n");
+  sb_append_cstr(&sb,"0000000009 00000 n\n");
 
-  // xref table
-  char* xref = "xref\n";
-  write_line_to_file(xref, file);
-  char* obj_num = "0 2\n";
-  write_line_to_file(obj_num, file);
-  char* obj_zero = "0000000000 65535 f\n";
-  write_line_to_file(obj_zero, file);
-  char* obj_catalog = "0000000009 00000 n\n";
-  write_line_to_file(obj_catalog, file);
-
-  write_line_to_file("\n", file);
+  sb_append_cstr(&sb,"\n");
 
   // trailer
-  char* trailer = "trailer\n";
-  write_line_to_file(trailer, file);
-  char* size = "    << /Size 2\n       /Root 1 0 R\n    >>\n";
-  write_line_to_file(size, file);
-  char* start_xref = "startxref\n";
-  write_line_to_file(start_xref, file);
+  sb_append_cstr(&sb,"trailer\n");
+  sb_append_cstr(&sb,"    << /Size 2\n       /Root 1 0 R\n    >>\n");
+  sb_append_cstr(&sb,"startxref\n");
+
   char count[10] = {0};
   sprintf(count, "%zu\n", start_xref_count);
-  write_line_to_file(count, file);
-  char* eof = "%%EOF";
-  write_line_to_file(eof, file);
+  sb_append_cstr(&sb, count);
 
-  int closed = fclose(file);
+  sb_append_cstr(&sb,"%%EOF");
+
+  write_sb_to_file(&sb, file);
+
+  sb_free(&sb);
 
   // TODO: Handle errno when closing file.
+  int closed = fclose(file);
 
   printf("Closed file.\n");
+
 
   return 0;
 }
