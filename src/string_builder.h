@@ -13,6 +13,8 @@ void sb_append_cstr(StringBuilder *sb, char *c);
 
 void sb_to_cstr(StringBuilder *sb, char* str, int length);
 
+size_t write_sb_to_file(StringBuilder *sb, FILE* file);
+
 void sb_reset(StringBuilder *sb);
 
 void sb_free(StringBuilder *sb);

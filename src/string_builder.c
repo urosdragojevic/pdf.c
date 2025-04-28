@@ -36,6 +36,12 @@ void sb_to_cstr(StringBuilder *sb, char* str, int length) {
   str[i+1] = '\0';
 }
 
+size_t write_sb_to_file(StringBuilder *sb, FILE* file) {
+  size_t written = fwrite(sb->items, sizeof(char), sb->count, file);
+  printf("Written %zu bytes to file.\n", written);
+  return written;
+}
+
 void sb_reset(StringBuilder *sb) {
   sb->count = 0;
 }
@@ -47,45 +53,3 @@ void sb_free(StringBuilder *sb) {
   sb->capacity = 0;
 }
 
-// int main() {
-//
-//   StringBuilder sb = {0}; // this is stack
-//   sb_init(&sb, 2);
-//
-//   sb_append_cstr(&sb, "abc");
-//
-//   printf("%c\n", sb.items[0]);
-//   printf("%c\n", sb.items[1]);
-//   printf("%c\n", sb.items[2]);
-//
-//   sb_reset(&sb);
-//
-//   sb_append_cstr(&sb, "def");
-//
-//   printf("%c\n", sb.items[0]);
-//   printf("%c\n", sb.items[1]);
-//   printf("%c\n", sb.items[2]);
-//
-//   char a[4] = {0};
-//
-//   sb_to_cstr(&sb, a, sizeof(a));
-//
-//   printf("%s\n", a);
-//
-//
-//   sb_free(&sb);
-//
-//   // sb.count = 0;
-//   // sb.capacity = 1024;
-//   // sb.items = malloc(1024); // ptr on stack, memory on heap
-//                            //
-//   // char* hello = "hello"; // this is a cstr
-//   //                        //
-//   //                        //
-//   // while(*hello != NULL) {
-//   //   printf("%d\n", *hello);
-//   //   hello = hello + 1;
-//   // }
-//
-//   return 0;
-// }

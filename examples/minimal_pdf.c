@@ -1,16 +1,11 @@
 #include<stdio.h>
-#include "./string_builder.h"
+#include "../src/string_builder.h"
 
-size_t write_sb_to_file(StringBuilder *sb, FILE* file) {
-  size_t written = fwrite(sb->items, sizeof(char), sb->count, file);
-  printf("Written %zu bytes to file.\n", written);
-  return written;
-}
-
-// Generates an absolutely minimal ./test.pdf file
+// Generates an absolutely minimal ./minimal.pdf file
+// PDF contains only catalog, not even any pages
 int main() {
   FILE* file;
-  file = fopen("./test.pdf", "w");
+  file = fopen("./minimal.pdf", "w");
 
   if (file == NULL) {
     fprintf(stderr, "Could not open file.\n");
@@ -56,7 +51,6 @@ int main() {
   int closed = fclose(file);
 
   printf("Closed file.\n");
-
 
   return 0;
 }
